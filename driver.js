@@ -1,7 +1,7 @@
-const codeStringFirst = "Code 'GENIECODE0' is applied to your cart, Total price is: 90$";
-const codeStringSecond = "Code 'GENIECODE1' is applied to your cart, Total price is: 80$";
-const codeStringThird = "Code 'GENIECODE2' is applied to your cart, Total price is: 70$";
-const totalPrice = "Total price is: 150.12$";
+const codeStringFirst = "Code 'GENIECODE0' is applied to your cart, Total price is: 90 $";
+const codeStringSecond = "Code 'GENIECODE1' is applied to your cart, Total price is: $80.32";
+const codeStringThird = "Code 'GENIECODE2' is applied to your cart, Total price is: 70 USD";
+const totalPrice = "Total price is: 150,12$";
 
 const arrayStrings = [
     codeStringFirst, 
@@ -18,14 +18,23 @@ function getCodeName(arr) {
     };
 };
 
+function checkCodePrice(code) {
+    const regexp = /[\.,]/g
+    if(regexp.test(code)) {
+        return +code.replace(regexp, ".");
+    } else {
+        return null;
+    };
+}
+
 function getTotalPrice(arr) {
-    const regexp = /\d+(\.\d+)?/g;
+    const regexp = /\d+([\.,]\d+)?/g;
     const codePrice = arr.match(regexp);
     if (regexp.test(arr)) {
         if (Array.isArray(codePrice)) {
-            return +codePrice[codePrice.length - 1]
+            return checkCodePrice(codePrice[codePrice.length - 1]);
         } else {
-            return +codeString.match(regexp);
+            return checkCodePrice(codeString.match(regexp));
         }
     } else {
         return null;
