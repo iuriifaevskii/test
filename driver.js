@@ -1,70 +1,77 @@
 const codeStringFirst = "Code 'GENIECODE0' is applied to your cart, Total price is: 90$";
 const codeStringSecond = "Code 'GENIECODE1' is applied to your cart, Total price is: 80$";
 const codeStringThird = "Code 'GENIECODE2' is applied to your cart, Total price is: 70$";
-const totalPrice = "Total price is: 150$";
+const totalPrice = "Total price is: 150.12$";
 
-const arrayCodesString = [
+const arrayStrings = [
     codeStringFirst, 
     codeStringSecond, 
     codeStringThird
 ];
 
-function getCodeName(codeString) {
+function getCodeName(arr) {
     const regexp = /'(.*?)'/
-    if(regexp.test(codeString)) {
-        return codeString.match(regexp)[1];
+    if(regexp.test(arr)) {
+        return arr.match(regexp)[1];
     } else {
         return null;
     };
 };
 
-function getTotalPrice(codeString) {
-    const regexp = /\d+/g;
-    const codePrice = codeString.match(regexp);
-    if (regexp.test(codeString)) {
+function getTotalPrice(arr) {
+    const regexp = /\d+(\.\d+)?/g;
+    const codePrice = arr.match(regexp);
+    if (regexp.test(arr)) {
         if (Array.isArray(codePrice)) {
-            return parseInt(codePrice[codePrice.length - 1])
+            return +codePrice[codePrice.length - 1]
         } else {
-            return parseInt(codeString.match(regexp));
+            return +codeString.match(regexp);
         }
     } else {
         return null;
     };
 };
 
-function getBestCode() {
-    const maxDiscount = Math.max(...discountArrayCodes);
-    for (var key in objectCodes) {
-        if (objectCodes.hasOwnProperty(key) && objectCodes[key] === maxDiscount) {
+function getBestCode(arr, total) {
+    const codes = getAllCodePrices(arr, total);
+    const discountCodes = arr.map(item => {
+        return getTotalPrice(total) - getTotalPrice(item);
+    });
+
+    const maxDiscount = Math.max(...discountCodes);
+    for (var key in codes) {
+        if (codes.hasOwnProperty(key) && codes[key] === maxDiscount) {
             return {
                 bestCode: key,
-                bestCodeDiscount: objectCodes[key]
+                bestCodeDiscount: codes[key]
             }
         }
     }
 };
+function getAllCodePrices(arr, total) {
+    const allCodePrices = arr.map(item => {
+        const nameCode = getCodeName(item)
+        const discount = getTotalPrice(total) - getTotalPrice(item);
+        const codeObject = {
+            [nameCode]: +discount.toFixed(2)
+        };
 
-const discountArrayCodes = arrayCodesString.map(item => {
-    return getTotalPrice(totalPrice) - getTotalPrice(item);
-});
+        return codeObject;
+    });
 
-const allCodePrices = arrayCodesString.map(item => {
-    const nameCode = getCodeName(item)
-    const discount = getTotalPrice(totalPrice) - getTotalPrice(item);
-    const codeObject = {
-        [nameCode]: discount
-    };
-    return codeObject;
-});
+    return Object.assign(...allCodePrices);
+}
 
-const objectCodes = Object.assign(...allCodePrices)
-const bestCode = getBestCode();
-const originalPrice = getTotalPrice(totalPrice);
+function getResult(arr, total) {
+    const objectCodes = getAllCodePrices(arr, total);
+    const bestCode = getBestCode(arr, total);
+    const originalPrice = getTotalPrice(total);
+    
+    return resultObject = [
+        objectCodes,
+        bestCode, {
+        originalPrice
+    }];
+}
 
-const resultObject = [
-    objectCodes,
-    bestCode, {
-    originalPrice
-}];
-
-console.log(resultObject);
+console.log(getResult(arrayStrings, totalPrice));
