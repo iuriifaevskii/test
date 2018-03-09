@@ -20,8 +20,7 @@ function showCodes(validCodes, invalidCodes) {
 function onLoad() {
     const validCodes = [];
     const invalidCodes = [];
-    const list = document.getElementsByClassName('list');
-    const items = list[0].children;
+    const items = document.querySelectorAll("p");
     const regExpIsNotValid = /is not [a,v]/i
     
     for (let i = 0; i < items.length; i++) {
