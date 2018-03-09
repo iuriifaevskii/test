@@ -1,6 +1,6 @@
 function getCode(codeString) {
-    var regExpValidCode = /\w*/;
-    var codeExp = codeString.match(regExpValidCode);
+    const regExpValidCode = /\w*/;
+    const codeExp = codeString.match(regExpValidCode);
     if (Array.isArray(codeExp)) {
         return codeString.match(regExpValidCode)[0];
     } else {
@@ -18,13 +18,13 @@ function showCodes(validCodes, invalidCodes) {
 }
 
 function onLoad() {
-    var validCodes = [];
-    var invalidCodes = [];
-    var list = document.getElementsByClassName('list');
-    var items = list[0].children;
-    var regExpIsNotValid = /is not [a,v]/i
+    const validCodes = [];
+    const invalidCodes = [];
+    const list = document.getElementsByClassName('list');
+    const items = list[0].children;
+    const regExpIsNotValid = /is not [a,v]/i
     
-    for (var i = 0; i < items.length; i++) {
+    for (let i = 0; i < items.length; i++) {
         if(items[i].innerText && regExpIsNotValid.test(items[i].innerText)) {
             validCodes.push(getCode(items[i].innerText));
         } else {
@@ -34,3 +34,5 @@ function onLoad() {
     
     showCodes(validCodes, invalidCodes);
 }
+
+onLoad();
