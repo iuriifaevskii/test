@@ -22,7 +22,7 @@ function showCodes(validCodes, invalidCodes) {
 function onLoad() {
     var validCodes = [];
     var invalidCodes = [];
-    var items = document.querySelectorAll("p");
+    var items = document.querySelectorAll(".list p");
     var regExpIsNotValid = /is not [a,v]/i;
 
     for (var i = 0; i < items.length; i++) {
