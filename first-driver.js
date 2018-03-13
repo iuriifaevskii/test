@@ -75,7 +75,7 @@ class Driver {
                         return this._parseTotal(originalPrice.textContent);
                     }
                 });
-                return totalPrice = sum.reduce((a, b) => a + b, 0);
+                return sum.reduce((a, b) => a + b, 0);
             }
         })
     }
