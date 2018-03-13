@@ -9,8 +9,9 @@ class Driver {
     constructor() {
         this.codes = [
             'PZ6VXDJ',
+            'BIGBOO40',
             '10SPRING',
-            'SWAP4HER40'
+            'SWAP4HER40',
         ];
         this.codesSuccessful = [];
         this.total = 0;
@@ -27,7 +28,6 @@ class Driver {
                 requestParams.set(param[0], param[1]);
             }
         }
-        console.log(requestParams.toString())
         return requestParams.toString();
     }
 
@@ -53,11 +53,10 @@ class Driver {
 
     _parseTotalFromRequest(code) {
         return this._applyCode(code).then(resultHtml => {
-            console.log(resultHtml)
+            //console.log(resultHtml)
             const parser = new DOMParser();
             const doc = parser.parseFromString(resultHtml, "text/html");
-//https://www.swap.com/v1/catalog/
-            if (code) {
+            if (!code) {
                 return this._getPricesResult(doc).then(res => {
                     const price = res.items.map(item => this._parseTotal(item.price.net[0]))
                     const totalPrice = price.reduce((a, b) => a + b, 0);
@@ -65,16 +64,22 @@ class Driver {
                     return totalPrice;
                 });
             } else {
-                const nodes = doc.querySelectorAll('.discounted-price')
-                const discountedPrices = [...nodes].map(item => item)
-                console.log('discountedPrices', discountedPrices)
-                const totalPrice 
-                return totalPrice
+                const nodes = doc.querySelectorAll('.discounted-price');
+                const priceNodes = doc.querySelectorAll('.summary-line.item-line')
+                const sum = [...priceNodes].map(item => {
+                    const discountedElement = item.querySelector('.discounted-price');
+                    if (discountedElement) {
+                        return this._parseTotal(discountedElement.textContent);
+                    } else {
+                        let originalPrice = item.querySelector('strong');
+                        return this._parseTotal(originalPrice.textContent);
+                    }
+                });
+                return totalPrice = sum.reduce((a, b) => a + b, 0);
             }
         })
     }
-    //original-price muted text-small
-//{items: ["7216164707", "9749677784", "9667244900", "9207382984", "9616599053"]}
+    
     _getCartItemIds(doc) {
         const nodes = doc.querySelectorAll('.summary-line.item-line')
         const ids = [...nodes].map(item => item.dataset.id)
@@ -92,24 +97,44 @@ class Driver {
     }
 
     async _compareTotalToGetDiscount(code, totalWithoutCode) {
-            const totalWithCode = await this._parseTotalFromRequest(code);
-            const discount = totalWithoutCode - totalWithCode;
-            console.log(discount)
-            if (totalWithCode < totalWithoutCode) {
-                this.codesSuccessful.push({code, discount});
-            }
-            console.log(code)
-            console.log('??', discount)
-            return this.codesSuccessful;
+        const totalWithCode = await this._parseTotalFromRequest(code);
+        const discount = totalWithoutCode - totalWithCode;
+        if (totalWithCode < totalWithoutCode) {
+            this.codesSuccessful.push({code, discount});
+        }
+        return this.codesSuccessful;
     }
 
-    async chooseBestAndApply() {
+    async applyAll() {
         this.total = await this._parseTotalFromRequest();
         console.log('total?',this.total)
         Promise.each(this.codes, (item) => {
             return this._compareTotalToGetDiscount(item, this.total)
+        }).then(res => {
+            if (res) {
+                this.chooseBest()
+            }
         });
-        console.log(this.codesSuccessful)
+    }
+
+    chooseBest() {
+        const pricesSuccessful = this.codesSuccessful.map(item => item.discount);
+        const maxDiscount = Math.max(...pricesSuccessful);
+        const codeObj = this.codesSuccessful.find(item => item.discount === maxDiscount)
+        if (this.codesSuccessful.length > 0) {
+            this._applyCode(codeObj.code).then(res => {
+                if (res) {
+                    const input = document.querySelectorAll('#discount-input');
+                    const button = document.querySelector('form .apply-reward-code');
+                    input.value = codeObj.code;
+                    button.click();
+
+                    alert(`succesfull code is ${codeObj.code} with discount ${codeObj.discount}`);
+                } else {
+                    alert(`error`)
+                }
+            });
+        }
     }
 }
 
@@ -121,6 +146,6 @@ button.style.position = 'fixed';
 button.style.top = '0px';
 button.style.left = '0px';
 document.body.appendChild(button);
-button.addEventListener('click', function() {
-    driver.chooseBestAndApply();
+button.addEventListener('click', () => {
+    driver.applyAll();
 })
