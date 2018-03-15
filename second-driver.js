@@ -17,8 +17,15 @@ function _applyCode(code) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         }
-    }).then(result => result.text())
+    }).then(result => {
+        //result.text()
+        fetch(window.location.href, {
+            credentials: 'include',
+        }).then(res => console.log(res.text()))
+    });
 }
+
+
 
 function checkApplyResult(code) {
     const regexp = /"promoCode": \["(.*?)"\]/g;
